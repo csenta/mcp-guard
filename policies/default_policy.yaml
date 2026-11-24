@@ -1,0 +1,39 @@
+# MCP-Guard Default Security Policy
+
+version: "1.0"
+mode: "enforce" # options: enforce | audit
+
+rules:
+  # Path Traversal and Sensitive File Access Protection
+  file_access:
+    deny_patterns:
+      - "(?:^|/)\\.env(?:\\..*)?$"
+      - "(?:^|/)\\.ssh(?:/.*)?$"
+      - "(?:^|/)id_rsa(?:\\.pub)?$"
+      - "(?:^|/)id_ed25519(?:\\.pub)?$"
+      - "(?:^|/)\\.aws(?:/.*)?$"
+      - "(?:^|/)\\.git/config$"
+      - "^/etc/shadow$"
+      - "^/etc/passwd$"
+      - "^/etc/sudoers"
+      - "\\.\\./\\.\\." # Double traversal protection
+
+  # Command Execution Firewall (for bash, sh, run_command, exec tools)
+  command_execution:
+    deny_patterns:
+      - "rm\\s+-(?:r[fF]|f[rR]|rf|fr)\\s+[/~]"     # Destructive root/home wipe
+      - "\\bcurl\\b.*\\|\\s*(?:ba)?sh"             # Pipe to shell execution
+      - "\\bwget\\b.*\\|\\s*(?:ba)?sh"
+      - "(?:nc|netcat|ncat)\\s+.*-[eec]"           # Netcat reverse shell
+      - "/dev/tcp/\\d+\\.\\d+\\.\\d+\\.\\d+/\\d+" # Bash socket reverse shell
+      - ":\\(\\)\\s*\\{\\s*:\\|:&\\s*\\};:"        # Fork bomb
+      - "\\bmkfs\\b"                               # Disk formatting
+      - "\\bdd\\b.*of=/dev/(?:sd|nvme|hd)"         # Raw disk overwrite
+
+  # Network Request / Egress Guard
+  network_egress:
+    blocked_hosts:
+      - "169.254.169.254" # Cloud metadata endpoint (AWS / GCP / Azure)
+      - "metadata.google.internal"
+      - "127.0.0.1"       # Protect local loopback SSRF if configured
+      - "localhost"
