@@ -1,5 +1,7 @@
 # MCP-Guard: Security Firewall & Proxy for Model Context Protocol
 
+> **Status:** prototype. A personal security-research project, not a production product. Expect rough edges; issues and pull requests are welcome.
+
 A real-time security proxy and policy engine for **Model Context Protocol (MCP)** tool executions. It safeguards agentic AI systems against **indirect prompt injection**, **privilege escalation**, and **destructive tool execution**.
 
 ---
@@ -75,3 +77,7 @@ rules:
     blocked_hosts:
       - "169.254.169.254"
 ```
+
+## License
+
+MIT. See [LICENSE](LICENSE).
